@@ -13,6 +13,9 @@ lxml = "*"
 eyeD3 = "*"
 tqdm = "*"
 pydub = "*"
+pandas = "*"
+pdfreader = "*"
+requests = "*"
 
 [requires]
 python_version = "3.8"

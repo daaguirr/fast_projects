@@ -251,3 +251,4 @@ dmypy.json
 /audiobook/covers/**
 /audiobook/create_audiobook.config.json
 /crypto/assets/**
+servel/data/**
