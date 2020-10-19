@@ -3,6 +3,7 @@ import os
 import pandas as pd
 from pdfreader import SimplePDFViewer
 from tqdm import tqdm
+import json
 
 
 def is_rut(string: str):
@@ -27,11 +28,28 @@ def process(path: str, output_folder):
 
     pbar = tqdm(total=n_pages)
     lines = []
-    cnt = 0
+    cnt = 1
+
+    _, filename_r = os.path.split(path)
+    filename_c, _ = os.path.splitext(filename_r)
+
+    output_path = os.path.join(output_folder, f"{filename_c}.csv")
+
+    recovery_file = os.path.join(output_folder, f"{filename_c}.json")
+    if os.path.exists(recovery_file):
+        with open(recovery_file, 'r') as f:
+            recovery = json.load(f)
+        lines = recovery['lines']
+        page = recovery['page']
+        cnt = page + 1
+
+        viewer.navigate(page + 1)
+        pbar.update(page)
 
     while True:
         try:
             viewer.render()
+
             strings = viewer.canvas.strings
             bb = list(filter(lambda x: 'PADRÓN ELECTORAL' not in x, strings))
             current_line = []
@@ -47,10 +65,20 @@ def process(path: str, output_folder):
                     current_line.append(bb[i])
 
             lines.append(current_line[:7])
-            cnt += 1
-            pbar.update(1)
 
+            if cnt % 30 == 0:
+                check_point = {
+                    'lines': lines,
+                    'page': cnt
+                }
+                with open(recovery_file, 'w') as f:
+                    json.dump(check_point, f)
+
+            pbar.update(1)
+            cnt += 1
             viewer.next()
+            viewer.canvas.inline_images == []
+
         except Exception as e:
             print(e)
             break
@@ -64,11 +92,6 @@ def process(path: str, output_folder):
         new = line[:6]
         new[5] = line[5] + line[6]
         data.append(new)
-
-    _, filename_r = os.path.split(path)
-    filename_c, _ = os.path.splitext(filename_r)
-
-    output_path = os.path.join(output_folder, f"{filename_c}.csv")
 
     print(f"Converting to csv")
     df = pd.DataFrame(data=data, columns=column_names)
