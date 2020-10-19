@@ -73,6 +73,7 @@ def process(path: str, output_folder):
                 }
                 with open(recovery_file, 'w') as f:
                     json.dump(check_point, f)
+                viewer._pages = dict()
 
             pbar.update(1)
             cnt += 1
