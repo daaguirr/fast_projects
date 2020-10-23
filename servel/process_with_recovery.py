@@ -1,3 +1,4 @@
+import gc
 import os
 
 import pandas as pd
@@ -74,6 +75,7 @@ def process(path: str, output_folder):
                 with open(recovery_file, 'w') as f:
                     json.dump(check_point, f)
                 viewer._pages = dict()
+                gc.collect()
 
             pbar.update(1)
             cnt += 1
@@ -85,8 +87,21 @@ def process(path: str, output_folder):
             break
     pbar.close()
 
+    check_point = {
+        'lines': lines,
+        'page': cnt
+    }
+    with open(recovery_file, 'w') as f:
+        json.dump(check_point, f)
+    viewer._pages = dict()
+    gc.collect()
+
     data = []
     for line in lines:
+        if len(line) < 6:
+            print(f"Failed to covert to csv {path}")
+            print(line)
+            return
         if len(line) == 6:
             data.append(line)
             continue
