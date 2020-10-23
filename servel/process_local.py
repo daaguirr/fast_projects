@@ -2,6 +2,7 @@ from multiprocessing import Pool
 import os
 from process_with_recovery import process
 import json
+
 with open('servel/local_config.json', 'r') as f:
     config = json.load(f)
 
@@ -18,8 +19,7 @@ def wrapper(tt):
 if __name__ == '__main__':
     data = [(os.path.join(INPUT_FOLDER, f), OUT_FOLDER) for f in file_list]
 
-    # with Pool(2) as p:
-    #    it = p.imap(wrapper, data, chunksize=1)
-    #    next(it)
-    for d in data:
-        wrapper(d)
+    with Pool(2) as p:
+        p.map(wrapper, data, chunksize=1)
+    # for d in data:
+    #    wrapper(d)
