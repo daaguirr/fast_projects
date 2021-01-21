@@ -1,12 +1,18 @@
+import math
 import os
 import time
 from pathlib import Path
-import math
 
-PATH = "/Users/tdc/Downloads/EL GUARDIÁN ENTRE EL CENTENO"
-ARTIST = "J.D. Salinger"
-ALBUM = "El guardián entre el centeno"
-COVER_PATH = "covers/centeno.jpg"
+from environs import Env
+
+env = Env()
+env.read_env()
+
+with env.prefixed("TAGS_"):
+    PATH = env.str("PATH")
+    ARTIST = env.str("ARTIST")
+    ALBUM = env.str("ALBUM")
+    COVER_PATH = env.str("COVER_PATH")
 
 
 def format_number(n, max_n):
@@ -32,8 +38,8 @@ def main():
 
         p = Path(file)
         audiofile = eyed3.load(file)
-        if audiofile.tag is None:
-            audiofile.initTag()
+        # if audiofile.tag is None:
+        audiofile.initTag()
 
         audiofile.tag.artist = ARTIST
         audiofile.tag.album = ALBUM

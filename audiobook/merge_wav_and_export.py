@@ -1,25 +1,25 @@
-import json
 import os
 import re
 
+from environs import Env
 from pydub import AudioSegment
 from tqdm import trange
 
-with open("create_audiobook.config.json", "r") as f:
-    config = json.load(f)
+env = Env()
+env.read_env()
 
-FOLDER_NAME = config["OUTPUT_WAV_PATH"]
-FOLDER_OUTPUT = config["OUTPUT_MP3_PATH"]
-PREFIX = config["PREFIX_NAME"]
+with env.prefixed("CREATE_"):
+    FOLDER_NAME = env.str("OUTPUT_WAV_PATH")
+    FOLDER_OUTPUT = env.str("OUTPUT_MP3_PATH")
+    PREFIX = env.str("PREFIX_NAME")
 
 if not os.path.exists(FOLDER_OUTPUT):
     os.makedirs(FOLDER_OUTPUT, exist_ok=True)
 
 PREFIX_FILES_REGEX, PREFIX_FILES_REGEX_FN = \
-    f"{PREFIX}(\d\d)\w\.wav$", lambda chapter: f"{PREFIX}{chapter}\w\.wav$"
+    rf"{PREFIX}(\d\d\d|\d\d)\w\.wav$", lambda _chapter: rf"{PREFIX}{_chapter}\w\.wav$"
 
 files = [f for f in os.listdir(FOLDER_NAME) if re.search(PREFIX_FILES_REGEX, f)]
-
 chapters = sorted(list(set([re.match(PREFIX_FILES_REGEX, f).group(1) for f in files])))
 
 for i in trange(len(chapters)):

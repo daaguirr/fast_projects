@@ -5,23 +5,23 @@ import re
 
 from azure.cognitiveservices.speech import AudioDataStream, SpeechConfig, SpeechSynthesizer
 from bs4 import BeautifulSoup
+from environs import Env
 from tqdm import trange
-import json
 
-with open("create_audiobook.config.json", "r") as f:
-    config = json.load(f)
+env = Env()
+env.read_env()
 
-subscription_key = config["subscription_key"]
-region = config["region"]
+with env.prefixed("CREATE_"):
+    subscription_key = env.str("SUBSCRIPTION_KEY")
+    region = env.str("REGION")
+    FOLDER_NAME = env.str("OUTPUT_WAV_PATH")
+    FILE_TXT_PATH = env.str("FILE_TXT_PATH")
+    START_TOKEN = env.str("START_TOKEN")
+    END_TOKEN = env.str("END_TOKEN")
+    PREFIX_NAME = env.str("PREFIX_NAME")
 
 speech_config = SpeechConfig(subscription=subscription_key, region=region)
 synthesizer = SpeechSynthesizer(speech_config=speech_config, audio_config=None)
-
-FOLDER_NAME = config["OUTPUT_WAV_PATH"]
-FILE_TXT_PATH = config["FILE_TXT_PATH"]
-START_TOKEN = config["START_TOKEN"]
-END_TOKEN = config["END_TOKEN"]
-PREFIX_NAME = config["PREFIX_NAME"]
 
 with open(FILE_TXT_PATH, 'r') as file:
     file_txt = file.read()

@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-import json
-
 from azure.cognitiveservices.speech import AudioDataStream, SpeechConfig, SpeechSynthesizer
+from environs import Env
+
+env = Env()
+env.read_env()
 
 text = """
 """
 
-with open("create_audiobook.config.json", "r") as f:
-    config = json.load(f)
-
-subscription_key = config["subscription_key"]
-region = config["region"]
+with env.prefixed("CREATE_"):
+    subscription_key = env.str("SUBSCRIPTION_KEY")
+    region = env.str("REGION")
 
 speech_config = SpeechConfig(subscription=subscription_key, region=region)
 synthesizer = SpeechSynthesizer(speech_config=speech_config, audio_config=None)

@@ -16,6 +16,7 @@ pydub = "*"
 pandas = "*"
 pdfreader = "*"
 requests = "*"
+environs = "*"
 
 [requires]
 python_version = "3.8"

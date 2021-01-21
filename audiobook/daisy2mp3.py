@@ -1,9 +1,15 @@
 from pathlib import Path
+from environs import Env
+
 import bs4
 import re
 import os
 
-PATH = "/Users/tdc/Downloads/Neuromante (William Gibson)"
+env = Env()
+env.read_env()
+
+with env.prefixed("DAISY2MP3_"):
+    PATH = env.str("PATH")
 
 
 def audios_from_file(path):

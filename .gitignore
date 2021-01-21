@@ -252,3 +252,4 @@ dmypy.json
 /audiobook/create_audiobook.config.json
 /crypto/assets/**
 servel/data/**
+audiobook/.env
