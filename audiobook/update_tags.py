@@ -1,9 +1,10 @@
-import math
 import os
 import time
 from pathlib import Path
 
 from environs import Env
+
+from utils import format_number
 
 env = Env()
 env.read_env()
@@ -13,11 +14,6 @@ with env.prefixed("TAGS_"):
     ARTIST = env.str("ARTIST")
     ALBUM = env.str("ALBUM")
     COVER_PATH = env.str("COVER_PATH")
-
-
-def format_number(n, max_n):
-    digits = math.floor(math.log10(max_n)) + 1
-    return ("0" * digits + str(n))[-digits:]
 
 
 def main():
