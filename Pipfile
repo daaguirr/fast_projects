@@ -19,6 +19,7 @@ requests = "*"
 environs = "*"
 azure-cognitiveservices-speech = "*"
 jupyter = "*"
+selenium = "*"
 
 [requires]
 python_version = "3.9"

@@ -17,7 +17,10 @@ def get_all_files():
 
     all_files = []
     for a in soup.find_all('ref'):
-        all_files.append(os.path.join(PATH, a.get('src')))
+        src = a.get('src', None)
+        if src is None:
+            continue
+        all_files.append(os.path.join(PATH, src))
     return all_files
 
 
@@ -29,7 +32,7 @@ def main():
         tmp = audios_from_file(f)
         if len(tmp) > 1:
             raise Exception('Unsupported')
-        audio_files = os.path.join(PATH, tmp[0])
+        audio_files.append(os.path.join(PATH, tmp[0]))
 
     for i, audio_file in enumerate(audio_files):
         number = format_number(i + 1, len(files))

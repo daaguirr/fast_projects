@@ -28,6 +28,7 @@ def main():
     files.sort()
 
     print(files)
+    input("Press Enter to continue...")
 
     for i, file in enumerate(files):
         import eyed3
