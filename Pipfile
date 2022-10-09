@@ -20,6 +20,7 @@ environs = "*"
 azure-cognitiveservices-speech = "*"
 jupyter = "*"
 selenium = "*"
+roman = "*"
 
 [requires]
 python_version = "3.9"
