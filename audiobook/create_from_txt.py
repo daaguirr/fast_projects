@@ -126,7 +126,7 @@ def main():
     chapters_text = [chapters[i].text for i in range(len(chapters))]
 
     print("Starting Generation ...")
-    for i in trange(54, len(chapters_text)):
+    for i in trange(0, len(chapters)):
         create_chapter(chapters_text[i], my_format_number(i + 1))
 
 

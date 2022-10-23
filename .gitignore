@@ -253,3 +253,4 @@ dmypy.json
 /crypto/assets/**
 servel/data/**
 audiobook/.env
+bike/gear_config.json
