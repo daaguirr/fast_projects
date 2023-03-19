@@ -1,4 +1,5 @@
 import dataclasses
+import inspect
 import logging
 import traceback
 import json
@@ -30,25 +31,40 @@ START_TIMESTAMP = env.str("START_TIMESTAMP", "")
 
 @dataclasses.dataclass
 class GearConfig:
-    id: str
-    name: str
+    uuid: str
+    displayName: str
     cycling_type: str
-    added_timestamp: str
+    dateBegin: str
+
+    def __init__(self, **kwargs):
+        names = set([field.name for field in dataclasses.fields(self)])
+        for k, v in kwargs.items():
+            if k in names:
+                setattr(self, k, v)
 
     def add_gear(self, driver: webdriver.Firefox, activity_timestamp: str):
-        if activity_timestamp < self.added_timestamp:
+        if activity_timestamp < self.dateBegin:
             return
 
-        li = driver.find_element(By.ID, f"edit-gear-{self.id}")
+        li = driver.find_element(By.ID, f"edit-gear-{self.uuid}")
         if li.get_attribute('class') != "active":
             li.click()
             time.sleep(2)
 
 
+def get_default_args(func):
+    signature = inspect.signature(func)
+    return {
+        k: v.default
+        for k, v in signature.parameters.items()
+        if v.default is not inspect.Parameter.empty
+    }
+
+
 def try_catch_driver(fn):
     def inner(*args, **kwargs):
-        driver: webdriver = args[0]
-        url: str = args[1]
+        driver: webdriver = kwargs.get('driver', args[0] if len(args) > 0 else get_default_args(fn).get('driver'))
+        url: str = kwargs.get('url', args[1] if len(args) > 1 else get_default_args(fn).get('url'))
         try:
             return fn(*args, **kwargs)
         except Exception as e:

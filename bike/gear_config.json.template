@@ -1,8 +1,9 @@
 [
     {
-        "id": "",
-        "name": "",
-        "cycling_type": "",
-        "added_timestamp": ""
-    }
+    "uuid": "",
+    "displayName": "",
+    "dateBegin": "",
+    "cycling_type": ""
+    ...
+  }
 ]
