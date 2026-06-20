@@ -3,6 +3,9 @@ import math
 import codecs
 import os
 import typing as ty
+from functools import partial
+from pathlib import Path
+
 import bs4
 from pydub import AudioSegment
 
@@ -35,11 +38,11 @@ def write_part_to_file(f: ty.TextIO, name: str, content: str):
     f.flush()
 
 
-def create_part(text2speech_fn: ty.Callable[[str, str], ty.Any],
-                content: str, file: ty.TextIO, out_path: str,
+def create_part(text2speech_fn: ty.Callable[[str, Path], ty.Any],
+                content: str, file: ty.TextIO, out_path: Path,
                 part_id: str):
-    write_part_to_file(file, part_id, content)
     text2speech_fn(content, out_path)
+    write_part_to_file(file, part_id, content)
     return out_path
 
 
@@ -58,13 +61,15 @@ def get_chunks(lines: ty.List[str], max_size: int):
 
 @dataclasses.dataclass
 class CreateChapterParams:
-    text2speech_fn: ty.Callable[[str, str], ty.Any]
+    text2speech_fn: ty.Callable[[str, Path], ty.Any]
     chapter_str: str
     chapter_number: str
     name_builder: ty.Callable[[str], str]
     t2p_out_folder: str
     merge_out_folder: str
     out_extension: str = 'wav'
+    chunks_builder: ty.Callable[[list[str]], ty.Generator[tuple[str, str], None, None]] = partial(get_chunks,
+                                                                                                  max_size=6500)
     max_size: int = 6800
 
 
@@ -73,25 +78,45 @@ def create_chapter(params: CreateChapterParams):
     name_prefix = params.name_builder(params.chapter_number)
 
     files = []
-    chunks = get_chunks(lines, params.max_size)
 
-    recovery_file = open(os.path.join(params.t2p_out_folder, f"{name_prefix}.txt"), 'w')
-    try:
-        for chunk, current_letter in chunks:
-            out_path = os.path.join(params.t2p_out_folder, f"{name_prefix}{current_letter}.{params.out_extension}")
-            files.append(create_part(params.text2speech_fn, chunk, recovery_file, out_path, current_letter))
-    finally:
-        recovery_file.close()
+    recovery_path = Path(params.t2p_out_folder) / f"{name_prefix}.txt"
+
+    with open(recovery_path, "a", encoding="utf-8") as recovery_file:
+        for chunk, current_letter in params.chunks_builder(lines):
+            out_path = Path(params.t2p_out_folder) / f"{name_prefix}{current_letter}.{params.out_extension}"
+
+            files.append(str(out_path))
+            if out_path.exists() and out_path.stat().st_size > 0:
+                print(f"Skipping existing part {params.chapter_number} {current_letter}")
+                continue
+            create_part(params.text2speech_fn, chunk, recovery_file, out_path, current_letter)
+
+            recovery_file.flush()
+            os.fsync(recovery_file.fileno())
+
     merge_chapter(params.chapter_number, files, params.merge_out_folder)
 
 
 def merge_chapter(chapter_name: str, files: list[str], out_folder: str):
-    playlist_songs = [AudioSegment.from_mp3(f) for f in files]
+    output_file = Path(out_folder) / f"{chapter_name}.mp3"
+
+    if output_file.exists() and output_file.stat().st_size > 0:
+        print(f"Skipping merged chapter {chapter_name}")
+        return str(output_file)
+
+    playlist_songs = [AudioSegment.from_file(f) for f in files]
     combined = AudioSegment.empty()
+
     for song in playlist_songs:
         combined += song
 
-    combined.export(os.path.join(out_folder, f"{chapter_name}.mp3"), format="mp3", bitrate="192k")
+    combined.export(
+        output_file,
+        format="mp3",
+        bitrate="192k"
+    )
+
+    return str(output_file)
 
 
 def base_format_number_fn(n_chapters: int):

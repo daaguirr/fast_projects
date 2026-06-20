@@ -254,3 +254,5 @@ dmypy.json
 servel/data/**
 audiobook/.env
 bike/gear_config.json
+**/out/**
+audiobook/.credentials/**

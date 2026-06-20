@@ -21,7 +21,9 @@ azure-cognitiveservices-speech = "*"
 jupyter = "*"
 selenium = "*"
 roman = "*"
+httpx = "*"
+audible-cli = "*"
 google-cloud-texttospeech = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.13"

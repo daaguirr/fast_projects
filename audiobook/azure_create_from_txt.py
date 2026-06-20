@@ -2,6 +2,7 @@
 import os
 import re
 import time
+from pathlib import Path
 
 from azure.cognitiveservices.speech import AudioDataStream, SpeechConfig, SpeechSynthesizer
 from bs4 import BeautifulSoup
@@ -32,7 +33,7 @@ speech_config = SpeechConfig(subscription=subscription_key, region=region)
 synthesizer = SpeechSynthesizer(speech_config=speech_config, audio_config=None)
 
 
-def text2speech(string, name):
+def text2speech(string: str, name: Path):
     ssml_string = f"""
     <speak version="1.0" xmlns="https://www.w3.org/2001/10/synthesis" xml:lang="{LANG}">
         <voice name="{LANG}-{VOICE}">
@@ -51,7 +52,7 @@ def text2speech(string, name):
         input("Press Enter to continue...")
 
     stream = AudioDataStream(result)
-    stream.save_to_wav_file(name)
+    stream.save_to_wav_file(str(name))
 
     time.sleep(5)
 
